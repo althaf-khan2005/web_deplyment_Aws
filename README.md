@@ -1,5 +1,19 @@
 # Full Stack Authentication App
 
+## Environment Setup
+
+### Backend (.env)
+```
+MONGO_URI=mongodb://localhost:27017/authdb
+JWT_SECRET=your_secret_key_here
+PORT=5000
+```
+
+### Frontend (.env)
+```
+VITE_API_URL=http://localhost:5000
+```
+
 ## Setup Instructions
 
 ### Backend Setup
@@ -35,12 +49,18 @@
 - User Login
 - JWT Authentication
 - Welcome Dashboard showing user email
-- Beautiful gradient UI
+- Spotify-style dark UI with sidebar navigation
 - MongoDB integration
 
 ## Usage
 1. Open http://localhost:3000
 2. Register a new account
 3. Login with your credentials
-4. See welcome message with your email
+4. Navigate using sidebar (Home, Search, Profile)
 5. Logout when done
+
+## For Production Deployment
+Update frontend/.env:
+```
+VITE_API_URL=http://your-ec2-ip:5000
+```
