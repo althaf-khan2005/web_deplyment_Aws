@@ -7,8 +7,11 @@ dotenv.config();
 
 const app = express();
 
+
+const cors = require('cors');
+
 app.use(cors({
-  origin: "https://d1vha1ok9nyioq.cloudfront.net",
+  origin: 'https://d3nh9h6fhknmex.cloudfront.net',
   credentials: true
 }));
 app.use(express.json());
