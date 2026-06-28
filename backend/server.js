@@ -8,13 +8,6 @@ dotenv.config();
 const app = express();
 
 app.use(cors());
-
-
-
-app.use(cors({
-  origin: 'https://d3nh9h6fhknmex.cloudfront.net',
-  credentials: true
-}));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
