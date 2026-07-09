@@ -1,0 +1,47 @@
+services:
+    
+    DB:
+     image: postgres
+     container_name: postgres_conatiner
+     ports:
+      - 5432:5432
+     environment:
+       POSTGRES_USER: Althaf
+       POSTGRES_PASSWORD: Althaf@2005
+       POSTGRES_DB: mydb
+   
+      
+    
+    backend:
+       build: ./backend
+       image: backend/backend:v1
+       container_name: backend_conatiner
+       restart: unless-stopped
+       depends_on:
+        - DB
+       env_file:
+         ./backend/.env
+       ports:
+         - 5000:5000
+      
+    frontend:
+      build: ./frontend
+      image: frontend/forntend:v1
+      container_name: forntend_conatiner
+      restart: unless-stopped
+      depends_on:
+       - backend
+      env_file:
+         ./frontend/.env
+      ports:
+       - 3000:3001
+
+volumes:
+  althaf:
+
+networks:
+  Althaf_khan:
+   driver: bridge
+
+    
+     
