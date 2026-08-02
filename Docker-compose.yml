@@ -1,47 +1,90 @@
 services:
-    
-    DB:
-     image: postgres
-     container_name: postgres_conatiner
-     ports:
+  # ========== DATABASE ==========
+  DB:
+    image: postgres
+    container_name: postgres_container
+    ports:
       - 5432:5432
-     environment:
-       POSTGRES_USER: Althaf
-       POSTGRES_PASSWORD: Althaf@2005
-       POSTGRES_DB: mydb
-   
-      
-    
-    backend:
-       build: ./backend
-       image: backend/backend:v1
-       container_name: backend_conatiner
-       restart: unless-stopped
-       depends_on:
-        - DB
-       env_file:
-         ./backend/.env
-       ports:
-         - 5000:5000
-      
-    frontend:
-      build: ./frontend
-      image: frontend/forntend:v1
-      container_name: forntend_conatiner
-      restart: unless-stopped
-      depends_on:
-       - backend
-      env_file:
-         ./frontend/.env
-      ports:
-       - 3000:3001
+    environment:
+      POSTGRES_USER: Althaf
+      POSTGRES_PASSWORD: Althaf@2005
+      POSTGRES_DB: mydb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U Althaf -d mydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - althaf:/var/lib/postgresql/data
+    networks:
+      - Althaf_khan
+
+  # ========== JAEGER (Trace Visualization) ==========
+  # This is where you SEE what's happening with your services
+  # Access the UI at http://localhost:16686
+  jaeger:
+    image: jaegertracing/all-in-one:1.53
+    container_name: jaeger_container
+    ports:
+      - "16686:16686"   # Jaeger UI - open this in your browser!
+      - "4317:4317"     # OTLP gRPC receiver
+      - "4318:4318"     # OTLP HTTP receiver (our backend sends traces here)
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:16686"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - Althaf_khan
+
+  # ========== BACKEND ==========
+  backend:
+    build: ./backend
+    image: backend/backend:v1
+    container_name: backend_container
+    restart: unless-stopped
+    depends_on:
+      DB:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env
+    environment:
+      # Tell OpenTelemetry where to send traces (Jaeger container)
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+    ports:
+      - 5000:5000
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - Althaf_khan
+
+  # ========== FRONTEND ==========
+  frontend:
+    build: ./frontend
+    image: frontend/frontend:v1
+    container_name: frontend_container
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - ./frontend/.env
+    ports:
+      - 3000:3001
+    networks:
+      - Althaf_khan
 
 volumes:
   althaf:
 
 networks:
   Althaf_khan:
-   driver: bridge
-
-    
-     
+    driver: bridge

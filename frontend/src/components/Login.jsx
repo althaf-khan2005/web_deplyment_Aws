@@ -21,7 +21,14 @@ function Login({ setUser, setIsLogin }) {
       localStorage.setItem('email', res.data.email)
       setUser({ email: res.data.email })
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed')
+      if (!err.response) {
+        // Network error - backend is unreachable
+        setError('Unable to reach server. Please check your connection or try again later.')
+      } else if (err.response.status === 503) {
+        setError('Service is temporarily unavailable. Please try again in a moment.')
+      } else {
+        setError(err.response?.data?.message || 'Login failed')
+      }
     }
   }
 

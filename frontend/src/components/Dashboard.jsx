@@ -1,5 +1,6 @@
 import './Dashboard.css'
 import Navbar from './Navbar'
+import SystemHealth from './SystemHealth'
 import { useState } from 'react'
 
 function Dashboard({ email, onLogout }) {
@@ -23,6 +24,9 @@ function Dashboard({ email, onLogout }) {
                 <p>Explore the navigation menu to access different features.</p>
                 <p>Stay connected and enjoy your experience!</p>
               </div>
+
+              {/* System Status Widget - shows real-time health of all services */}
+              <SystemHealth />
             </>
           )}
 

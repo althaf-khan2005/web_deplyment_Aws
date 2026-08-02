@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Login from './components/Login'
 import Register from './components/Register'
 import Dashboard from './components/Dashboard'
+import ServiceStatus from './components/ServiceStatus'
 import './App.css'
 
 function App() {
@@ -23,17 +24,25 @@ function App() {
   }
 
   if (user) {
-    return <Dashboard email={user.email} onLogout={handleLogout} />
+    return (
+      <>
+        <ServiceStatus />
+        <Dashboard email={user.email} onLogout={handleLogout} />
+      </>
+    )
   }
 
   return (
-    <div className="container">
-      {isLogin ? (
-        <Login setUser={setUser} setIsLogin={setIsLogin} />
-      ) : (
-        <Register setUser={setUser} setIsLogin={setIsLogin} />
-      )}
-    </div>
+    <>
+      <ServiceStatus />
+      <div className="container">
+        {isLogin ? (
+          <Login setUser={setUser} setIsLogin={setIsLogin} />
+        ) : (
+          <Register setUser={setUser} setIsLogin={setIsLogin} />
+        )}
+      </div>
+    </>
   )
 }
 
