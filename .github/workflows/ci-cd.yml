@@ -39,7 +39,7 @@ jobs:
           name: frontend-dist
           path: frontend/dist
 
-  deploy-to-AWS_Cloud:
+  Deploy-to-AWS_Cloud:
     runs-on: ubuntu-latest
     needs: ci-test
 
@@ -49,7 +49,11 @@ jobs:
         with:
           name: frontend-dist
           path: ./dist
-          run: ls 
+          
+      - name: "List downloaded files"
+        run: | 
+           ls 
+           pwd
 
       - name: "Configure AWS Credentials"
         uses: aws-actions/configure-aws-credentials@v4
@@ -64,7 +68,7 @@ jobs:
   Cloudfront:
 
        runs-on: ubuntu-latest
-       needs: deploy-to-AWS_Cloud
+       needs: Deploy-to-AWS_Cloud
 
        steps:
 

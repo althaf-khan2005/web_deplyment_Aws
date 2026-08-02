@@ -35,13 +35,11 @@ function App() {
   return (
     <>
       <ServiceStatus />
-      <div className="container">
-        {isLogin ? (
-          <Login setUser={setUser} setIsLogin={setIsLogin} />
-        ) : (
-          <Register setUser={setUser} setIsLogin={setIsLogin} />
-        )}
-      </div>
+      {isLogin ? (
+        <Login setUser={setUser} setIsLogin={setIsLogin} />
+      ) : (
+        <Register setUser={setUser} setIsLogin={setIsLogin} />
+      )}
     </>
   )
 }
