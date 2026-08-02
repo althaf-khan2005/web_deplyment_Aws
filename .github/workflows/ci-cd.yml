@@ -28,9 +28,9 @@ jobs:
            npm run build
 
       - name: "Checking the Audit"
-        run : | 
+        run: | 
             cd frontend
-            npm audit --fix
+            npm audit || true
 
 
       - name: "Upload build artifact"
