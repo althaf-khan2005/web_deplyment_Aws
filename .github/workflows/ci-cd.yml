@@ -30,7 +30,7 @@ jobs:
       - name: "Checking the Audit"
         run : | 
             cd frontend
-            npm audit
+            npm audit --fix
 
 
       - name: "Upload build artifact"
