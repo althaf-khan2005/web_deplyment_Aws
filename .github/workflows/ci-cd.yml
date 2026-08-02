@@ -18,7 +18,7 @@ jobs:
           node-version: "20"
 
       - name: "Install, Audit and Build"
-        run: npm ci
+        run: npm i
 
       - name: "Install the libary"
         run : npm run build
