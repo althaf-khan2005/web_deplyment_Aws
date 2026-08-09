@@ -19,7 +19,7 @@ function addEntry(list, entry) {
 }
 
 /**
- * Middleware: Record every request
+ * Middleware: Record every requests
  */
 export function requestRecorder(req, res, next) {
   const start = Date.now();
