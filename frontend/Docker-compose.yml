@@ -15,7 +15,7 @@ services:
     backend:
        build: ./backend
        image: backend/backend:v1
-       container_name: backend_conatiner
+       container_name: backend_conatine
        restart: unless-stopped
        depends_on:
         - DB
