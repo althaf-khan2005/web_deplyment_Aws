@@ -34,7 +34,6 @@ function App() {
 
   return (
     <>
-      <ServiceStatus />
       {isLogin ? (
         <Login setUser={setUser} setIsLogin={setIsLogin} />
       ) : (
