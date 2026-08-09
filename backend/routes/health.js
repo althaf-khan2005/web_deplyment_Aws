@@ -47,7 +47,7 @@ router.get('/health', async (req, res) => {
     checks.database.responseTime = Date.now() - dbStart;
     serviceUpGauge.add(-1, { service: 'database' });
 
-    // Record error in trace so you can see it in Jaege
+    // Record error in trace so you can see it in Jaeg
     span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
     span.recordException(error);
     span.setAttribute('health.database.error', error.message);
