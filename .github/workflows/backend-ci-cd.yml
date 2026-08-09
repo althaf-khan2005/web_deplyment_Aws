@@ -45,8 +45,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ec2-user/web_deplyment_Aws
-            git pull origin main
             cd backend
+            git pull
             npm ci --production
             npx prisma generate
             npx prisma migrate deploy
