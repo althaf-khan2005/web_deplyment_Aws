@@ -1,0 +1,331 @@
+/* ============================================
+   INSTA NOTES - Instagram-style disappearing notes
+   ============================================ */
+
+.insta-notes {
+  background: #111118;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 24px;
+  margin-top: 30px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.notes-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.notes-subtitle {
+  font-size: 12px;
+  color: #666;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+/* Add Note Button */
+.add-note-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-note-btn:hover {
+  border-color: rgba(29, 185, 84, 0.3);
+  background: rgba(29, 185, 84, 0.03);
+  color: #1db954;
+}
+
+.add-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1db954, #0d9445);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 300;
+}
+
+/* Note Input */
+.note-input-container {
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.note-input-card {
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+  min-height: 120px;
+}
+
+.note-input-card textarea {
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  resize: none;
+  font-family: inherit;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.note-input-card textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.char-count {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Color Picker */
+.color-picker {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0;
+  justify-content: center;
+}
+
+.color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.color-dot:hover {
+  transform: scale(1.2);
+}
+
+.color-dot.selected {
+  border-color: #fff;
+  transform: scale(1.2);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+/* Actions */
+.note-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancel-btn {
+  padding: 10px 20px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #888;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.post-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #1db954, #0d9445);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.post-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(29, 185, 84, 0.3);
+}
+
+.post-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Notes Feed */
+.notes-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+/* Note Card */
+.note-card {
+  border-radius: 16px;
+  overflow: hidden;
+  animation: noteIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.5s ease;
+}
+
+.note-card.fading {
+  opacity: 0.6;
+  transform: scale(0.98);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes noteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+/* Progress Bar */
+.note-progress-bar {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.note-progress-fill {
+  height: 100%;
+  transition: width 0.1s linear;
+  border-radius: 0 3px 3px 0;
+}
+
+/* Note Body */
+.note-body {
+  padding: 20px 24px;
+}
+
+.note-text {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  word-break: break-word;
+}
+
+/* Note Footer */
+.note-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.note-timer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #aaa;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.note-vanishing {
+  font-size: 11px;
+  color: #f87171;
+  font-weight: 500;
+  animation: blink 0.8s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Empty State */
+.notes-empty {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.empty-icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.notes-empty p {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.empty-hint {
+  font-size: 12px !important;
+  color: #444 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .insta-notes {
+    padding: 18px;
+  }
+
+  .note-input-card {
+    padding: 18px;
+  }
+
+  .note-input-card textarea {
+    font-size: 16px;
+  }
+}

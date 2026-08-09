@@ -1,6 +1,7 @@
 import './Dashboard.css'
 import Navbar from './Navbar'
 import SystemHealth from './SystemHealth'
+import InstaNotes from './InstaNotes'
 import { useState, useEffect } from 'react'
 
 function Dashboard({ email, onLogout }) {
@@ -131,6 +132,8 @@ function Dashboard({ email, onLogout }) {
                   </button>
                 </div>
               </div>
+
+              <InstaNotes />
 
               <SystemHealth />
             </>
