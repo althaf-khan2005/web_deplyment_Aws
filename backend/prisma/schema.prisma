@@ -8,11 +8,33 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  password String
-  notes    Note[]
-  posts    Post[]
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  bio       String?
+  isPublic  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  notes     Note[]
+  posts     Post[]
+  followers Follow[] @relation("following")
+  following Follow[] @relation("follower")
+
+  @@index([username])
+}
+
+model Follow {
+  id         Int      @id @default(autoincrement())
+  followerId Int
+  followingId Int
+  follower   User     @relation("follower", fields: [followerId], references: [id])
+  following  User     @relation("following", fields: [followingId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
 }
 
 model Note {
@@ -33,6 +55,7 @@ model Post {
   caption   String?
   image     String?  @db.Text
   audio     String?  @db.Text
+  audioName String?
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
