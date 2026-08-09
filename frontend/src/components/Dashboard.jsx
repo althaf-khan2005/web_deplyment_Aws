@@ -18,6 +18,7 @@ function Dashboard({ email, onLogout }) {
   const [searchResults, setSearchResults] = useState([])
   const [viewingUser, setViewingUser] = useState(null)
   const [playingPost, setPlayingPost] = useState(null)
+  const [stories, setStories] = useState([])
   const audioRef = useRef(null)
 
   const getAuthHeader = () => ({
@@ -66,6 +67,16 @@ function Dashboard({ email, onLogout }) {
     catch (err) {}
   }
 
+  const fetchStories = async () => {
+    try { const res = await axios.get(`${API_URL}/api/stories`, getAuthHeader()); setStories(res.data) }
+    catch (err) {}
+  }
+
+  const deleteStory = async (id) => {
+    try { await axios.delete(`${API_URL}/api/stories/${id}`, getAuthHeader()); fetchStories() }
+    catch (err) {}
+  }
+
   // Play/Pause song - only one at a time
   const togglePlay = (postId, audioSrc) => {
     if (playingPost === postId) {
@@ -81,7 +92,7 @@ function Dashboard({ email, onLogout }) {
     }
   }
 
-  useEffect(() => { fetchPosts(); fetchMyPosts(); fetchMyProfile() }, [])
+  useEffect(() => { fetchPosts(); fetchMyPosts(); fetchMyProfile(); fetchStories() }, [])
   const handlePostCreated = () => { fetchPosts(); fetchMyPosts(); setActivePage('home') }
 
   const timeAgo = (d) => {
@@ -105,22 +116,8 @@ function Dashboard({ email, onLogout }) {
         {/* HOME */}
         {activePage === 'home' && (
           <div className="ig-feed">
-            {/* Stories - dynamic from posts */}
-            <div className="ig-stories-bar">
-              <div className="ig-stories-scroll">
-                <MusicStory email={email} />
-                {posts.filter(p => p.audio).slice(0, 8).map((post, i) => (
-                  <div key={post.id} className="ig-story-item" onClick={() => togglePlay(post.id, post.audio)}>
-                    <div className={`ig-story-ring ${playingPost === post.id ? 'playing' : ''}`} style={{ background: gradients[i % 6] }}>
-                      <div className="ig-story-avatar">
-                        {playingPost === post.id ? '🔊' : '🎵'}
-                      </div>
-                    </div>
-                    <span className="ig-story-name">{post.user.username || post.user.email.split('@')[0]}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Stories - dynamic from API */}
+            <MusicStory email={email} stories={stories} onStoryPosted={fetchStories} onDeleteStory={deleteStory} />
 
             {/* Feed Posts */}
             <div className="ig-posts">

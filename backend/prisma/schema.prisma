@@ -18,6 +18,7 @@ model User {
 
   notes     Note[]
   posts     Post[]
+  stories   Story[]
   followers Follow[] @relation("following")
   following Follow[] @relation("follower")
 
@@ -61,4 +62,20 @@ model Post {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+model Story {
+  id        Int      @id @default(autoincrement())
+  image     String?  @db.Text
+  audio     String?  @db.Text
+  audioName String?
+  text      String?
+  bgColor   String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+  @@index([expiresAt])
 }
