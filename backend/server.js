@@ -14,7 +14,14 @@ dotenv.config();
 const app = express();
 
 // CORS - allow frontend to reach backend
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://d1odyai7xs2p0i.cloudfront.net',
+    'http://localhost:3000',
+    'http://localhost:3001'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // Record all requests for the trace viewer
