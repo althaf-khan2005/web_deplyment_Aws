@@ -1,200 +1,208 @@
 import './Dashboard.css'
 import Navbar from './Navbar'
-import SystemHealth from './SystemHealth'
 import InstaNotes from './InstaNotes'
+import PostCreate from './PostCreate'
 import { useState, useEffect } from 'react'
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL
 
 function Dashboard({ email, onLogout }) {
   const [activePage, setActivePage] = useState('home')
-  const [greeting, setGreeting] = useState('')
-  const [animate, setAnimate] = useState(false)
+  const [posts, setPosts] = useState([])
+  const [myPosts, setMyPosts] = useState([])
+  const [loadingPosts, setLoadingPosts] = useState(true)
+
+  const getAuthHeader = () => ({
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  })
+
+  const fetchPosts = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/posts`, getAuthHeader())
+      setPosts(res.data)
+    } catch (err) {
+      console.error('Failed to fetch posts:', err)
+    } finally {
+      setLoadingPosts(false)
+    }
+  }
+
+  const fetchMyPosts = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/posts/me`, getAuthHeader())
+      setMyPosts(res.data)
+    } catch (err) {
+      console.error('Failed to fetch my posts:', err)
+    }
+  }
+
+  const deletePost = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/api/posts/${id}`, getAuthHeader())
+      setPosts(prev => prev.filter(p => p.id !== id))
+      setMyPosts(prev => prev.filter(p => p.id !== id))
+    } catch (err) {
+      console.error('Failed to delete post:', err)
+    }
+  }
 
   useEffect(() => {
-    const hour = new Date().getHours()
-    if (hour < 12) setGreeting('Good Morning')
-    else if (hour < 18) setGreeting('Good Afternoon')
-    else setGreeting('Good Evening')
-
-    setTimeout(() => setAnimate(true), 100)
+    fetchPosts()
+    fetchMyPosts()
   }, [])
 
-  useEffect(() => {
-    setAnimate(false)
-    setTimeout(() => setAnimate(true), 50)
-  }, [activePage])
+  const handlePostCreated = () => {
+    fetchPosts()
+    fetchMyPosts()
+    setActivePage('home')
+  }
+
+  const timeAgo = (dateStr) => {
+    const seconds = Math.floor((Date.now() - new Date(dateStr)) / 1000)
+    if (seconds < 60) return 'Just now'
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
+    return `${Math.floor(seconds / 86400)}d ago`
+  }
 
   return (
     <>
-      <Navbar activePage={activePage} setActivePage={setActivePage} onLogout={onLogout} />
+      <Navbar activePage={activePage} setActivePage={setActivePage} onLogout={onLogout} email={email} />
       <div className="dashboard">
-        <div className={`dashboard-content-wrapper ${animate ? 'animate-in' : ''}`}>
-          {activePage === 'home' && (
-            <>
-              <div className="welcome-section">
-                <div className="welcome-text">
-                  <span className="greeting-label">{greeting}</span>
-                  <h1 className="welcome-title">Welcome back! 👋</h1>
-                  <p className="welcome-email">{email}</p>
-                </div>
-                <div className="welcome-decoration">
-                  <div className="deco-circle deco-1"></div>
-                  <div className="deco-circle deco-2"></div>
-                  <div className="deco-circle deco-3"></div>
-                </div>
-              </div>
+        {/* HOME - Feed */}
+        {activePage === 'home' && (
+          <div className="feed-container">
+            {/* Notes Section */}
+            <InstaNotes />
 
-              <div className="stats-grid">
-                <div className="stat-card stat-card-1">
-                  <div className="stat-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                    </svg>
-                  </div>
-                  <div className="stat-info">
-                    <span className="stat-value">99.9%</span>
-                    <span className="stat-label">Uptime</span>
-                  </div>
-                </div>
-                <div className="stat-card stat-card-2">
-                  <div className="stat-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                    </svg>
-                  </div>
-                  <div className="stat-info">
-                    <span className="stat-value">45ms</span>
-                    <span className="stat-label">Response</span>
-                  </div>
-                </div>
-                <div className="stat-card stat-card-3">
-                  <div className="stat-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    </svg>
-                  </div>
-                  <div className="stat-info">
-                    <span className="stat-value">Active</span>
-                    <span className="stat-label">Security</span>
-                  </div>
-                </div>
-                <div className="stat-card stat-card-4">
-                  <div className="stat-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                      <line x1="8" y1="21" x2="16" y2="21"/>
-                      <line x1="12" y1="17" x2="12" y2="21"/>
-                    </svg>
-                  </div>
-                  <div className="stat-info">
-                    <span className="stat-value">3</span>
-                    <span className="stat-label">Services</span>
-                  </div>
-                </div>
-              </div>
+            {/* Posts Feed */}
+            <div className="posts-section">
+              <h3 className="feed-title">Feed</h3>
 
-              <div className="quick-actions">
-                <h3 className="section-title">Quick Actions</h3>
-                <div className="actions-grid">
-                  <button className="action-card" onClick={() => setActivePage('profile')}>
-                    <div className="action-icon action-icon-purple">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                      </svg>
+              {loadingPosts && <div className="feed-loading">Loading posts...</div>}
+
+              {!loadingPosts && posts.length === 0 && (
+                <div className="feed-empty">
+                  <span className="empty-icon">📷</span>
+                  <p>No posts yet</p>
+                  <p className="empty-sub">Be the first to share something!</p>
+                  <button className="empty-btn" onClick={() => setActivePage('create')}>Create Post</button>
+                </div>
+              )}
+
+              {posts.map(post => (
+                <div key={post.id} className="post-card">
+                  <div className="post-header">
+                    <div className="post-avatar">
+                      {post.user.email[0].toUpperCase()}
                     </div>
-                    <span>Profile Settings</span>
-                  </button>
-                  <button className="action-card" onClick={() => setActivePage('search')}>
-                    <div className="action-icon action-icon-blue">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="11" cy="11" r="8"/>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                      </svg>
+                    <div className="post-user-info">
+                      <span className="post-username">{post.user.email.split('@')[0]}</span>
+                      <span className="post-time">{timeAgo(post.createdAt)}</span>
                     </div>
-                    <span>Search</span>
-                  </button>
-                  <button className="action-card">
-                    <div className="action-icon action-icon-green">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 12a9 9 0 11-6.219-8.56"/>
-                        <polyline points="22 4 12 14.01 9 11.01"/>
-                      </svg>
+                  </div>
+
+                  {post.image && (
+                    <div className="post-image-container">
+                      <img src={post.image} alt="Post" className="post-image" />
                     </div>
-                    <span>Deployments</span>
-                  </button>
-                  <button className="action-card">
-                    <div className="action-icon action-icon-orange">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                      </svg>
+                  )}
+
+                  {post.audio && (
+                    <div className="post-audio-container">
+                      <div className="audio-wave-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M9 18V5l12-2v13"/>
+                          <circle cx="6" cy="18" r="3"/>
+                          <circle cx="18" cy="16" r="3"/>
+                        </svg>
+                      </div>
+                      <audio controls src={post.audio} className="post-audio" />
                     </div>
-                    <span>Analytics</span>
-                  </button>
+                  )}
+
+                  {post.caption && (
+                    <div className="post-caption">
+                      <span className="caption-user">{post.user.email.split('@')[0]}</span>
+                      {post.caption}
+                    </div>
+                  )}
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* CREATE */}
+        {activePage === 'create' && (
+          <div className="create-container">
+            <PostCreate onPostCreated={handlePostCreated} />
+          </div>
+        )}
+
+        {/* PROFILE */}
+        {activePage === 'profile' && (
+          <div className="profile-container">
+            <div className="profile-header-section">
+              <div className="profile-avatar-large">
+                {email[0].toUpperCase()}
               </div>
-
-              <InstaNotes />
-
-              <SystemHealth />
-            </>
-          )}
-
-          {activePage === 'search' && (
-            <div className="page-section">
-              <div className="page-header">
-                <h2>Search</h2>
-                <p>Find anything across your workspace</p>
-              </div>
-              <div className="search-container">
-                <div className="search-box">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                  </svg>
-                  <input type="text" placeholder="Search deployments, settings, logs..." />
-                </div>
-                <div className="search-hints">
-                  <span className="hint-tag">Deployments</span>
-                  <span className="hint-tag">Logs</span>
-                  <span className="hint-tag">Settings</span>
-                  <span className="hint-tag">Users</span>
+              <div className="profile-stats">
+                <h2 className="profile-name">{email.split('@')[0]}</h2>
+                <p className="profile-email">{email}</p>
+                <div className="profile-counts">
+                  <div className="count-item">
+                    <span className="count-number">{myPosts.length}</span>
+                    <span className="count-label">Posts</span>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
 
-          {activePage === 'profile' && (
-            <div className="page-section">
-              <div className="page-header">
-                <h2>Profile</h2>
-                <p>Manage your account settings</p>
-              </div>
-              <div className="profile-card">
-                <div className="profile-avatar">
-                  <span>{email[0].toUpperCase()}</span>
+            <div className="profile-posts-section">
+              <h3 className="profile-posts-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="7" height="7"/>
+                  <rect x="14" y="3" width="7" height="7"/>
+                  <rect x="14" y="14" width="7" height="7"/>
+                  <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                Your Posts
+              </h3>
+
+              {myPosts.length === 0 && (
+                <div className="feed-empty">
+                  <p>No posts yet</p>
+                  <button className="empty-btn" onClick={() => setActivePage('create')}>Share your first post</button>
                 </div>
-                <div className="profile-info">
-                  <h3>{email}</h3>
-                  <span className="profile-badge">Pro Account</span>
-                </div>
-              </div>
-              <div className="profile-details">
-                <div className="detail-row">
-                  <span className="detail-label">Email</span>
-                  <span className="detail-value">{email}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Role</span>
-                  <span className="detail-value">Administrator</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Status</span>
-                  <span className="detail-value status-active">● Active</span>
-                </div>
+              )}
+
+              <div className="profile-grid">
+                {myPosts.map(post => (
+                  <div key={post.id} className="profile-post-card">
+                    {post.image && <img src={post.image} alt="" className="grid-image" />}
+                    {!post.image && post.audio && (
+                      <div className="grid-audio">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M9 18V5l12-2v13"/>
+                          <circle cx="6" cy="18" r="3"/>
+                          <circle cx="18" cy="16" r="3"/>
+                        </svg>
+                      </div>
+                    )}
+                    {!post.image && !post.audio && (
+                      <div className="grid-text">
+                        <p>{post.caption}</p>
+                      </div>
+                    )}
+                    <button className="grid-delete" onClick={() => deletePost(post.id)}>🗑️</button>
+                  </div>
+                ))}
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </>
   )

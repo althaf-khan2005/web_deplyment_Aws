@@ -11,4 +11,31 @@ model User {
   id       Int    @id @default(autoincrement())
   email    String @unique
   password String
+  notes    Note[]
+  posts    Post[]
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  text      String
+  color     String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([expiresAt])
+  @@index([userId])
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  caption   String?
+  image     String?  @db.Text
+  audio     String?  @db.Text
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

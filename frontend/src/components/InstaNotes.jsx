@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
+import axios from 'axios'
 import './InstaNotes.css'
+
+const API_URL = import.meta.env.VITE_API_URL
 
 function InstaNotes() {
   const [notes, setNotes] = useState([])
   const [newNote, setNewNote] = useState('')
   const [showInput, setShowInput] = useState(false)
   const [selectedColor, setSelectedColor] = useState(0)
+  const [loading, setLoading] = useState(true)
   const inputRef = useRef(null)
 
   const colors = [
@@ -17,45 +21,83 @@ function InstaNotes() {
     { bg: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)', label: 'Lavender' },
   ]
 
+  const getAuthHeader = () => ({
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  })
+
+  // Fetch notes from backend
+  const fetchNotes = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/notes`, getAuthHeader())
+      setNotes(res.data)
+    } catch (err) {
+      console.error('Failed to fetch notes:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchNotes()
+    // Refresh every 60 seconds to update timers
+    const interval = setInterval(fetchNotes, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
   useEffect(() => {
     if (showInput && inputRef.current) {
       inputRef.current.focus()
     }
   }, [showInput])
 
-  // Timer: remove notes after 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNotes(prev => prev.filter(note => Date.now() - note.createdAt < 30000))
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const addNote = (e) => {
+  const addNote = async (e) => {
     e.preventDefault()
     if (!newNote.trim()) return
 
-    const note = {
-      id: Date.now(),
-      text: newNote.trim(),
-      color: colors[selectedColor].bg,
-      createdAt: Date.now(),
+    try {
+      const res = await axios.post(`${API_URL}/api/notes`, {
+        text: newNote.trim(),
+        color: colors[selectedColor].bg
+      }, getAuthHeader())
+
+      setNotes(prev => [res.data, ...prev])
+      setNewNote('')
+      setShowInput(false)
+    } catch (err) {
+      console.error('Failed to create note:', err)
     }
-
-    setNotes(prev => [note, ...prev])
-    setNewNote('')
-    setShowInput(false)
   }
 
-  const getTimeLeft = (createdAt) => {
-    const elapsed = Math.floor((Date.now() - createdAt) / 1000)
-    const remaining = 30 - elapsed
-    return remaining > 0 ? remaining : 0
+  const deleteNote = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/api/notes/${id}`, getAuthHeader())
+      setNotes(prev => prev.filter(n => n.id !== id))
+    } catch (err) {
+      console.error('Failed to delete note:', err)
+    }
   }
 
-  const getProgress = (createdAt) => {
-    const elapsed = (Date.now() - createdAt) / 30000
-    return Math.min(elapsed, 1)
+  const getTimeLeft = (expiresAt) => {
+    const remaining = new Date(expiresAt) - Date.now()
+    if (remaining <= 0) return '0s'
+    
+    const hours = Math.floor(remaining / (1000 * 60 * 60))
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
+    
+    if (hours > 0) return `${hours}h ${minutes}m`
+    if (minutes > 0) return `${minutes}m`
+    return `${Math.floor(remaining / 1000)}s`
+  }
+
+  const getProgress = (createdAt, expiresAt) => {
+    const total = new Date(expiresAt) - new Date(createdAt)
+    const elapsed = Date.now() - new Date(createdAt)
+    return Math.min(elapsed / total, 1)
+  }
+
+  const isExpiringSoon = (expiresAt) => {
+    const remaining = new Date(expiresAt) - Date.now()
+    return remaining < 60 * 60 * 1000 // less than 1 hour
   }
 
   return (
@@ -63,19 +105,20 @@ function InstaNotes() {
       <div className="notes-header">
         <h3 className="notes-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 20h9"/>
-            <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            <path d="M9 18V5l12-2v13"/>
+            <circle cx="6" cy="18" r="3"/>
+            <circle cx="18" cy="16" r="3"/>
           </svg>
-          Quick Notes
+          Music Notes
         </h3>
-        <span className="notes-subtitle">Disappears in 30s</span>
+        <span className="notes-subtitle">🎵 Disappears in 24h</span>
       </div>
 
       {/* Add Note Button */}
       {!showInput && (
         <button className="add-note-btn" onClick={() => setShowInput(true)}>
-          <span className="add-icon">+</span>
-          <span>Add a note...</span>
+          <span className="add-icon">♪</span>
+          <span>Add a music note...</span>
         </button>
       )}
 
@@ -87,11 +130,11 @@ function InstaNotes() {
               ref={inputRef}
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
-              placeholder="What's on your mind?"
-              maxLength={120}
+              placeholder="🎶 What song is stuck in your head?"
+              maxLength={200}
               rows={3}
             />
-            <div className="char-count">{newNote.length}/120</div>
+            <div className="char-count">{newNote.length}/200</div>
           </div>
 
           <div className="color-picker">
@@ -122,40 +165,57 @@ function InstaNotes() {
         </form>
       )}
 
+      {/* Loading State */}
+      {loading && (
+        <div className="notes-empty">
+          <span className="empty-icon">⏳</span>
+          <p>Loading notes...</p>
+        </div>
+      )}
+
       {/* Notes Feed */}
-      {notes.length > 0 && (
+      {!loading && notes.length > 0 && (
         <div className="notes-feed">
           {notes.map(note => (
-            <NoteCard key={note.id} note={note} getTimeLeft={getTimeLeft} getProgress={getProgress} />
+            <NoteCard
+              key={note.id}
+              note={note}
+              getTimeLeft={getTimeLeft}
+              getProgress={getProgress}
+              isExpiringSoon={isExpiringSoon}
+              onDelete={deleteNote}
+            />
           ))}
         </div>
       )}
 
-      {notes.length === 0 && !showInput && (
+      {!loading && notes.length === 0 && !showInput && (
         <div className="notes-empty">
-          <span className="empty-icon">💭</span>
-          <p>No active notes</p>
-          <p className="empty-hint">Notes disappear after 30 seconds</p>
+          <span className="empty-icon">🎵</span>
+          <p>No active music notes</p>
+          <p className="empty-hint">Share a song — it disappears after 24 hours</p>
         </div>
       )}
     </div>
   )
 }
 
-function NoteCard({ note, getTimeLeft, getProgress }) {
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft(note.createdAt))
-  const [progress, setProgress] = useState(getProgress(note.createdAt))
+function NoteCard({ note, getTimeLeft, getProgress, isExpiringSoon, onDelete }) {
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft(note.expiresAt))
+  const [progress, setProgress] = useState(getProgress(note.createdAt, note.expiresAt))
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimeLeft(getTimeLeft(note.createdAt))
-      setProgress(getProgress(note.createdAt))
-    }, 100)
+      setTimeLeft(getTimeLeft(note.expiresAt))
+      setProgress(getProgress(note.createdAt, note.expiresAt))
+    }, 1000)
     return () => clearInterval(interval)
-  }, [note.createdAt])
+  }, [note.expiresAt, note.createdAt])
+
+  const expiring = isExpiringSoon(note.expiresAt)
 
   return (
-    <div className={`note-card ${timeLeft <= 5 ? 'fading' : ''}`}>
+    <div className={`note-card ${expiring ? 'fading' : ''}`}>
       <div className="note-progress-bar">
         <div
           className="note-progress-fill"
@@ -164,6 +224,9 @@ function NoteCard({ note, getTimeLeft, getProgress }) {
       </div>
       <div className="note-body" style={{ background: note.color }}>
         <p className="note-text">{note.text}</p>
+        <button className="note-delete-btn" onClick={() => onDelete(note.id)} aria-label="Delete note">
+          ×
+        </button>
       </div>
       <div className="note-footer">
         <span className="note-timer">
@@ -171,9 +234,9 @@ function NoteCard({ note, getTimeLeft, getProgress }) {
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
           </svg>
-          {timeLeft}s
+          {timeLeft}
         </span>
-        {timeLeft <= 5 && <span className="note-vanishing">Vanishing...</span>}
+        {expiring && <span className="note-vanishing">Expiring soon...</span>}
       </div>
     </div>
   )

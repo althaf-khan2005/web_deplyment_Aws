@@ -7,6 +7,8 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import healthRoutes from './routes/health.js';
 import traceRoutes, { requestRecorder } from './routes/traces.js';
+import notesRoutes from './routes/notes.js';
+import postsRoutes from './routes/posts.js';
 import { errorLogger, requestTimer, notFoundHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -23,7 +25,7 @@ app.use(cors({
   ],
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '15mb' }));
 
 // Record all requests for the trace viewer
 app.use(requestRecorder);
@@ -33,6 +35,8 @@ app.use(requestTimer);
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/notes', notesRoutes);
+app.use('/api/posts', postsRoutes);
 app.use('/', healthRoutes);
 app.use('/', traceRoutes);
 

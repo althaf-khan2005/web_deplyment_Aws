@@ -1,0 +1,226 @@
+/* Post Create */
+.post-create {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.create-header {
+  margin-bottom: 30px;
+}
+
+.create-header h2 {
+  color: #fff;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.create-header p {
+  color: #666;
+  font-size: 14px;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Image Preview */
+.preview-container {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  max-height: 400px;
+}
+
+.image-preview {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.remove-btn:hover {
+  background: #ef4444;
+  transform: scale(1.1);
+}
+
+/* Audio Preview */
+.audio-preview {
+  background: #111118;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.audio-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #1db954;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.audio-player {
+  width: 100%;
+  height: 36px;
+  border-radius: 8px;
+}
+
+.remove-audio-btn {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.remove-audio-btn:hover {
+  text-decoration: underline;
+}
+
+/* Caption */
+.caption-input {
+  position: relative;
+}
+
+.caption-input textarea {
+  width: 100%;
+  padding: 18px;
+  background: #111118;
+  border: 2px solid #222;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 15px;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.3s;
+}
+
+.caption-input textarea:focus {
+  border-color: #1db954;
+}
+
+.caption-input textarea::placeholder {
+  color: #555;
+}
+
+.caption-count {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  color: #444;
+  font-size: 11px;
+}
+
+/* Upload Buttons */
+.upload-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.upload-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 2px dashed #333;
+  background: none;
+  color: #888;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.photo-btn:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.music-btn:hover {
+  border-color: #1db954;
+  color: #1db954;
+  background: rgba(29, 185, 84, 0.05);
+}
+
+/* Error */
+.create-error {
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  color: #f87171;
+  font-size: 13px;
+}
+
+/* Share Button */
+.share-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #1db954, #1ed760);
+  border: none;
+  border-radius: 14px;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s;
+}
+
+.share-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(29, 185, 84, 0.3);
+}
+
+.share-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.share-loader {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(0, 0, 0, 0.2);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
