@@ -1,0 +1,537 @@
+/* ============================================
+   MUSIC STORY - Bottom Sheet + Clip Selector
+   ============================================ */
+
+/* Trigger Circle */
+.music-story {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.ms-trigger {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.ms-avatar-ring {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #1db954, #00f2fe, #667eea);
+  padding: 3px;
+  animation: ringPulse 3s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(29, 185, 84, 0); }
+}
+
+.ms-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #000;
+  overflow: hidden;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.ms-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ms-music-badge {
+  position: absolute;
+  bottom: 18px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1db954;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border: 2px solid #000;
+}
+
+.ms-label {
+  font-size: 11px;
+  color: #a8a8a8;
+}
+
+/* Overlay */
+.ms-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Bottom Sheet */
+.ms-sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  background: #1a1a1a;
+  border-radius: 20px 20px 0 0;
+  padding: 16px 20px 30px;
+  overflow-y: auto;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.ms-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 8px 0 20px;
+}
+
+.ms-sheet-handle {
+  position: absolute;
+  top: 0;
+  width: 36px;
+  height: 4px;
+  background: #444;
+  border-radius: 2px;
+}
+
+.ms-sheet-header h3 {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.ms-back, .ms-close {
+  position: absolute;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 10px;
+}
+
+.ms-back { left: 0; }
+.ms-close { right: 0; }
+
+/* Step 1: Main */
+.ms-step-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 0;
+}
+
+.ms-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.ms-photo-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  border: 3px dashed #444;
+  transition: border-color 0.2s;
+}
+
+.ms-photo-preview:hover { border-color: #1db954; }
+
+.ms-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ms-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #666;
+  font-size: 11px;
+}
+
+.ms-photo-hint {
+  color: #666;
+  font-size: 12px;
+}
+
+.ms-pick-song-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #1db954, #0d9445);
+  border: none;
+  border-radius: 30px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 100%;
+  justify-content: center;
+}
+
+.ms-pick-song-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 30px rgba(29, 185, 84, 0.3);
+}
+
+/* Step 2: Pick Song */
+.ms-step-pick {
+  padding: 40px 20px;
+}
+
+.ms-pick-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 50px 20px;
+  border: 2px dashed #333;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #888;
+}
+
+.ms-pick-area:hover {
+  border-color: #1db954;
+  background: rgba(29, 185, 84, 0.03);
+}
+
+.ms-pick-area p { font-size: 16px; font-weight: 600; color: #ddd; }
+.ms-pick-area span { font-size: 12px; color: #666; }
+
+/* Step 3: Clip Selector */
+.ms-step-clip {
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ms-song-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: #222;
+  border-radius: 12px;
+}
+
+.ms-song-disc {
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #333;
+  border-radius: 50%;
+}
+
+.ms-song-disc.spinning {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ms-song-details { display: flex; flex-direction: column; gap: 2px; }
+.ms-song-name { color: #fff; font-size: 15px; font-weight: 600; }
+.ms-song-duration { color: #888; font-size: 12px; }
+
+/* Clip Visual (Waveform) */
+.ms-clip-selector {
+  position: relative;
+}
+
+.ms-clip-visual {
+  height: 80px;
+  position: relative;
+  background: #111;
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.ms-clip-bars {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 2px;
+}
+
+.ms-bar {
+  flex: 1;
+  background: #333;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.ms-bar.active {
+  background: #1db954;
+}
+
+.ms-clip-highlight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(29, 185, 84, 0.1);
+  border-left: 2px solid #1db954;
+  border-right: 2px solid #1db954;
+  pointer-events: none;
+}
+
+.ms-clip-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.ms-clip-time {
+  color: #888;
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 36px;
+}
+
+.ms-clip-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+  outline: none;
+}
+
+.ms-clip-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #1db954;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(29, 185, 84, 0.5);
+}
+
+.ms-clip-label {
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* Play Button */
+.ms-play-btn {
+  width: 100%;
+  padding: 14px;
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ms-play-btn:hover { background: #2a2a2a; border-color: #1db954; }
+
+.ms-playing-indicator {
+  text-align: center;
+  color: #1db954;
+  font-size: 13px;
+  font-weight: 500;
+  animation: pulse 1s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.ms-next-btn {
+  width: 100%;
+  padding: 14px;
+  background: #0095f6;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ms-next-btn:hover { background: #1aa1f7; }
+
+/* Step 4: Background */
+.ms-step-bg {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 10px 0;
+}
+
+.ms-preview-card {
+  border-radius: 16px;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-height: 200px;
+  justify-content: center;
+}
+
+.ms-preview-photo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0,0,0,0.3);
+}
+
+.ms-preview-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ms-preview-note {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.ms-preview-song {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 20px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.9);
+}
+
+.ms-mini-disc {
+  animation: spin 3s linear infinite;
+}
+
+/* Background Picker */
+.ms-bg-picker {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ms-bg-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.ms-bg-dot:hover { transform: scale(1.15); }
+.ms-bg-dot.selected { border-color: #fff; transform: scale(1.15); box-shadow: 0 0 0 3px rgba(255,255,255,0.2); }
+
+/* Note Input */
+.ms-note-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ms-note-input:focus { border-color: #1db954; }
+.ms-note-input::placeholder { color: #666; }
+
+/* Post Button */
+.ms-post-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #1db954, #1ed760);
+  border: none;
+  border-radius: 14px;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.ms-post-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(29, 185, 84, 0.3);
+}
+
+.ms-post-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .ms-sheet {
+    max-height: 90vh;
+    border-radius: 16px 16px 0 0;
+  }
+}

@@ -4,6 +4,7 @@ import './Auth.css'
 
 function Register({ setUser, setIsLogin }) {
   const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -12,82 +13,97 @@ function Register({ setUser, setIsLogin }) {
     e.preventDefault()
     setError('')
     setLoading(true)
-
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, { email, password })
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, { email, password, username: username || undefined })
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('email', res.data.email)
       setUser({ email: res.data.email })
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed')
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
   return (
-    <div className="ig-auth-page">
-      <div className="ig-auth-container">
-        <div className="ig-auth-right">
-          <div className="ig-auth-box">
-            <h1 className="ig-auth-logo">MusicGram</h1>
-            <p className="ig-signup-tagline">Sign up to share music and photos with friends.</p>
+    <div className="auth-page">
+      <div className="auth-bg">
+        <div className="auth-blob blob-1"></div>
+        <div className="auth-blob blob-2"></div>
+        <div className="auth-blob blob-3"></div>
+      </div>
 
-            <button className="ig-social-btn ig-social-primary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-              Sign up with GitHub
-            </button>
-
-            <div className="ig-divider">
-              <div className="ig-divider-line"></div>
-              <span>OR</span>
-              <div className="ig-divider-line"></div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="ig-auth-form">
-              <div className="ig-input-wrapper">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email"
-                  required
-                  className="ig-input"
-                  aria-label="Email"
-                />
-              </div>
-
-              <div className="ig-input-wrapper">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  required
-                  className="ig-input"
-                  aria-label="Password"
-                />
-              </div>
-
-              {error && <div className="ig-error">{error}</div>}
-
-              <p className="ig-terms">
-                By signing up, you agree to our Terms, Privacy Policy and Cookies Policy.
-              </p>
-
-              <button type="submit" className="ig-submit-btn" disabled={loading || !email || !password}>
-                {loading ? <span className="ig-btn-spinner"></span> : 'Sign Up'}
-              </button>
-            </form>
+      <div className="auth-glass-card">
+        <div className="auth-logo-section">
+          <div className="auth-logo-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 18V5l12-2v13"/>
+              <circle cx="6" cy="18" r="3"/>
+              <circle cx="18" cy="16" r="3"/>
+            </svg>
           </div>
-
-          <div className="ig-auth-switch">
-            Have an account?{' '}
-            <button onClick={() => setIsLogin(true)}>Log in</button>
-          </div>
+          <h1 className="auth-logo-text">MusicGram</h1>
+          <p className="auth-tagline">Sign up to discover and share music with the world.</p>
         </div>
+
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="auth-input-group">
+            <div className="auth-input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </div>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email address"
+              required
+            />
+          </div>
+
+          <div className="auth-input-group">
+            <div className="auth-input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username"
+            />
+          </div>
+
+          <div className="auth-input-group">
+            <div className="auth-input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0110 0v4"/>
+              </svg>
+            </div>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+            />
+          </div>
+
+          {error && <div className="auth-error">{error}</div>}
+
+          <button type="submit" className="auth-submit" disabled={loading}>
+            {loading ? <span className="auth-spinner"></span> : 'Create Account'}
+          </button>
+        </form>
+
+        <p className="auth-terms">By signing up, you agree to our Terms and Privacy Policy.</p>
+
+        <p className="auth-switch">
+          Already have an account? <button onClick={() => setIsLogin(true)}>Sign in</button>
+        </p>
       </div>
     </div>
   )

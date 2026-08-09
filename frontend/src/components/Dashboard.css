@@ -16,6 +16,12 @@
   padding: 20px 0;
 }
 
+.ig-stories-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
 /* Loading Spinner */
 .ig-loading {
   display: flex;
@@ -285,7 +291,132 @@
 /* Explore */
 .ig-explore {
   padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
 }
+
+.ig-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #262626;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.ig-search-bar svg { color: #666; flex-shrink: 0; }
+
+.ig-search-bar input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 14px;
+}
+
+.ig-search-bar input::placeholder { color: #666; }
+
+/* Search Results */
+.ig-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 20px;
+}
+
+.ig-search-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ig-search-user:hover { background: #1a1a1a; }
+
+.ig-search-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.ig-search-info { flex: 1; }
+.ig-search-username { display: block; color: #fff; font-size: 14px; font-weight: 600; }
+.ig-search-bio { display: block; color: #666; font-size: 12px; margin-top: 2px; }
+.ig-search-posts { color: #666; font-size: 12px; }
+
+/* Follow / Unfollow buttons */
+.ig-follow-btn {
+  padding: 7px 24px;
+  background: #0095f6;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ig-follow-btn:hover { background: #1aa1f7; }
+
+.ig-unfollow-btn {
+  padding: 7px 24px;
+  background: #363636;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ig-unfollow-btn:hover { background: #4a4a4a; }
+
+/* Privacy */
+.ig-private-label {
+  color: #a8a8a8;
+  font-size: 14px;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.ig-privacy-badge {
+  color: #888;
+  font-size: 12px;
+  margin-top: 6px;
+  padding: 4px 10px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.ig-back-link {
+  display: block;
+  margin-top: 20px;
+  background: none;
+  border: none;
+  color: #0095f6;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px 0;
+}
+
+.ig-back-link:hover { color: #1aa1f7; }
 
 .ig-explore-title {
   color: #fff;

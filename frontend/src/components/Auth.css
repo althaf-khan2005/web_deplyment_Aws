@@ -1,337 +1,344 @@
 /* ============================================
-   MUSICGRAM - Instagram-style Auth
+   AUTH - Elegant Glassmorphism Design
    ============================================ */
 
-.ig-auth-page {
+.auth-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #000;
+  background: #050505;
+  position: relative;
+  overflow: hidden;
   padding: 20px;
 }
 
-.ig-auth-container {
-  display: flex;
+/* Animated Background Blobs */
+.auth-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.auth-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: blobFloat 20s ease-in-out infinite;
+}
+
+.blob-1 {
+  width: 400px;
+  height: 400px;
+  background: #1db954;
+  top: -10%;
+  left: -10%;
+  animation-delay: 0s;
+}
+
+.blob-2 {
+  width: 350px;
+  height: 350px;
+  background: #6366f1;
+  bottom: -10%;
+  right: -10%;
+  animation-delay: -7s;
+}
+
+.blob-3 {
+  width: 250px;
+  height: 250px;
+  background: #ec4899;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: -14s;
+}
+
+@keyframes blobFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(40px, -40px) scale(1.1); }
+  50% { transform: translate(-30px, 30px) scale(0.9); }
+  75% { transform: translate(20px, 20px) scale(1.05); }
+}
+
+/* Glass Card */
+.auth-glass-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  padding: 48px 36px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 32px 64px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  animation: cardEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(40px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Logo Section */
+.auth-logo-section {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.auth-logo-icon {
+  display: inline-flex;
   align-items: center;
-  gap: 40px;
-  max-width: 800px;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1db954, #1ed760);
+  color: #000;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(29, 185, 84, 0.3);
 }
 
-/* Phone Mockup */
-.ig-phone-mockup {
-  display: none;
-}
-
-@media (min-width: 876px) {
-  .ig-phone-mockup {
-    display: block;
-    flex-shrink: 0;
-  }
-}
-
-.ig-phone-frame {
-  width: 240px;
-  height: 480px;
-  background: #1a1a1a;
-  border-radius: 30px;
-  padding: 12px;
-  border: 2px solid #333;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-.ig-phone-screen {
-  width: 100%;
-  height: 100%;
-  background: #000;
-  border-radius: 20px;
-  overflow: hidden;
-  padding: 20px 16px;
-}
-
-.ig-phone-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.ig-phone-header {
+.auth-logo-text {
   font-size: 32px;
-  text-align: center;
-  padding: 20px 0;
-}
-
-.ig-phone-post {
-  background: #111;
-  border-radius: 12px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.ig-phone-img {
-  width: 100%;
-  height: 100px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 8px;
-  animation: phonePulse 3s ease-in-out infinite;
-}
-
-.ig-phone-audio {
-  width: 100%;
-  height: 60px;
-  background: linear-gradient(135deg, #1db954 0%, #38f9d7 100%);
-  border-radius: 8px;
-  animation: phonePulse 3s ease-in-out infinite 1.5s;
-}
-
-@keyframes phonePulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
-.ig-phone-bar {
-  height: 8px;
-  background: #262626;
-  border-radius: 4px;
-  width: 80%;
-}
-
-.ig-phone-bar.short {
-  width: 50%;
-}
-
-/* Auth Right Side */
-.ig-auth-right {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  max-width: 350px;
-}
-
-/* Auth Box */
-.ig-auth-box {
-  background: #000;
-  border: 1px solid #262626;
-  border-radius: 4px;
-  padding: 40px;
-  text-align: center;
-}
-
-.ig-auth-logo {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 36px;
   font-weight: 800;
   color: #fff;
-  margin-bottom: 12px;
   letter-spacing: -1px;
-  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  margin-bottom: 8px;
 }
 
-.ig-signup-tagline {
-  color: #a8a8a8;
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  line-height: 1.4;
+.auth-tagline {
+  color: #888;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 /* Form */
-.ig-auth-form {
+.auth-form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
 }
 
-.ig-input-wrapper {
+.auth-input-group {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.ig-input {
+.auth-input-icon {
+  position: absolute;
+  left: 16px;
+  color: #555;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s;
+  pointer-events: none;
+}
+
+.auth-input-group:focus-within .auth-input-icon {
+  color: #1db954;
+}
+
+.auth-input-group input {
   width: 100%;
-  padding: 12px 14px;
-  background: #121212;
-  border: 1px solid #363636;
-  border-radius: 4px;
+  padding: 16px 16px 16px 48px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.3s ease;
 }
 
-.ig-input:focus {
-  border-color: #555;
+.auth-input-group input::placeholder {
+  color: #555;
 }
 
-.ig-input::placeholder {
-  color: #666;
-  font-size: 12px;
+.auth-input-group input:focus {
+  border-color: rgba(29, 185, 84, 0.5);
+  background: rgba(29, 185, 84, 0.03);
+  box-shadow: 0 0 0 4px rgba(29, 185, 84, 0.08);
 }
 
 /* Error */
-.ig-error {
-  padding: 10px;
-  color: #ed4956;
+.auth-error {
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  color: #f87171;
   font-size: 13px;
   text-align: center;
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
 }
 
 /* Submit Button */
-.ig-submit-btn {
+.auth-submit {
   width: 100%;
-  padding: 10px;
-  background: #0095f6;
+  padding: 16px;
+  margin-top: 6px;
+  background: linear-gradient(135deg, #1db954, #1ed760);
   border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 14px;
+  border-radius: 14px;
+  color: #000;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 8px;
-  transition: opacity 0.2s;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
+  min-height: 52px;
+  position: relative;
+  overflow: hidden;
 }
 
-.ig-submit-btn:hover:not(:disabled) { opacity: 0.85; }
-.ig-submit-btn:disabled { opacity: 0.3; cursor: default; }
+.auth-submit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
 
-.ig-btn-spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+.auth-submit:hover:not(:disabled)::before { opacity: 1; }
+
+.auth-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(29, 185, 84, 0.35);
+}
+
+.auth-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.auth-submit:disabled {
+  opacity: 0.4;
+  cursor: default;
+  transform: none;
+}
+
+.auth-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(0, 0, 0, 0.2);
+  border-top-color: #000;
   border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Divider */
-.ig-divider {
+/* Separator */
+.auth-separator {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin: 20px 0;
+  margin: 24px 0;
+  gap: 12px;
 }
 
-.ig-divider-line {
+.auth-separator::before,
+.auth-separator::after {
+  content: '';
   flex: 1;
   height: 1px;
-  background: #262626;
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.ig-divider span {
-  color: #666;
-  font-size: 13px;
-  font-weight: 600;
+.auth-separator span {
+  color: #555;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
 }
 
-/* Social Button */
-.ig-social-btn {
+/* Social Icons */
+.auth-social-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.auth-social-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 10px;
-  background: none;
-  border: none;
-  color: #e0e0e0;
-  font-size: 14px;
-  font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.3s;
 }
 
-.ig-social-btn:hover { opacity: 0.7; }
-
-.ig-social-primary {
-  background: #0095f6;
-  border-radius: 8px;
-  color: #fff;
-  padding: 10px;
+.auth-social-icon:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
-
-.ig-social-primary:hover { opacity: 0.85; }
 
 /* Terms */
-.ig-terms {
-  color: #666;
-  font-size: 12px;
-  line-height: 1.5;
-  margin: 8px 0;
-}
-
-/* Switch Box */
-.ig-auth-switch {
-  background: #000;
-  border: 1px solid #262626;
-  border-radius: 4px;
-  padding: 20px;
+.auth-terms {
   text-align: center;
-  color: #a8a8a8;
-  font-size: 14px;
+  color: #555;
+  font-size: 11px;
+  margin-top: 16px;
+  line-height: 1.5;
 }
 
-.ig-auth-switch button {
+/* Switch */
+.auth-switch {
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+  margin-top: 24px;
+}
+
+.auth-switch button {
   background: none;
   border: none;
-  color: #0095f6;
+  color: #1db954;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  transition: color 0.2s;
 }
 
-.ig-auth-switch button:hover { color: #1aa1f7; }
-
-/* Get App */
-.ig-get-app {
-  text-align: center;
-  padding: 10px;
-}
-
-.ig-get-app p {
-  color: #a8a8a8;
-  font-size: 14px;
-  margin-bottom: 12px;
-}
-
-.ig-app-badges {
-  display: flex;
-  justify-content: center;
-}
-
-.ig-badge {
-  padding: 8px 16px;
-  background: #1a1a1a;
-  border: 1px solid #262626;
-  border-radius: 6px;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
+.auth-switch button:hover {
+  color: #1ed760;
+  text-decoration: underline;
 }
 
 /* Responsive */
-@media (max-width: 875px) {
-  .ig-auth-container {
-    justify-content: center;
-  }
-}
-
 @media (max-width: 450px) {
-  .ig-auth-box {
-    padding: 24px;
-    border: none;
+  .auth-glass-card {
+    padding: 36px 24px;
+    border-radius: 20px;
   }
-  .ig-auth-switch {
-    border: none;
+
+  .auth-logo-text {
+    font-size: 28px;
   }
+
+  .blob-1 { width: 250px; height: 250px; }
+  .blob-2 { width: 200px; height: 200px; }
+  .blob-3 { width: 150px; height: 150px; }
 }
