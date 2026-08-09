@@ -44,10 +44,10 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ec2-user/web_deplyment_Aws
+            cd /home/root/web_deplyment_Aws
             cd backend
             git pull
-            npm ci --production
+            npm i
             npx prisma generate
             npx prisma migrate deploy
             pm2 restart backend || pm2 start server.js --name backend

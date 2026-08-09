@@ -1,34 +1,81 @@
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import './Stories.css'
 
-function Stories({ email }) {
-  // Fake stories data for UI (in real app, fetch from API)
-  const stories = [
-    { id: 'yours', name: 'Your story', avatar: email?.[0]?.toUpperCase(), isYours: true, hasStory: false },
-    { id: 1, name: 'music_vibes', avatar: '🎵', hasStory: true },
-    { id: 2, name: 'dj_beats', avatar: '🎧', hasStory: true },
-    { id: 3, name: 'rock_fan', avatar: '🎸', hasStory: true },
-    { id: 4, name: 'jazz_soul', avatar: '🎷', hasStory: true },
-    { id: 5, name: 'piano_keys', avatar: '🎹', hasStory: true },
-    { id: 6, name: 'drum_loop', avatar: '🥁', hasStory: true },
-    { id: 7, name: 'bass_drop', avatar: '🔊', hasStory: true },
-  ]
+const API_URL = import.meta.env.VITE_API_URL
+
+function Stories({ email, onCreateClick }) {
+  const [recentUsers, setRecentUsers] = useState([])
+
+  const getAuthHeader = () => ({
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  })
+
+  useEffect(() => {
+    const fetchRecentPosts = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/posts`, getAuthHeader())
+        // Get unique users from recent posts
+        const seen = new Set()
+        const users = []
+        for (const post of res.data) {
+          if (!seen.has(post.user.email)) {
+            seen.add(post.user.email)
+            users.push({ email: post.user.email, hasAudio: !!post.audio, hasImage: !!post.image })
+          }
+          if (users.length >= 8) break
+        }
+        setRecentUsers(users)
+      } catch (err) { /* silent */ }
+    }
+    fetchRecentPosts()
+  }, [])
 
   return (
     <div className="stories-container">
       <div className="stories-scroll">
-        {stories.map(story => (
-          <div key={story.id} className="story-item">
-            <div className={`story-ring ${story.hasStory ? 'has-story' : ''} ${story.isYours ? 'yours' : ''}`}>
-              <div className="story-avatar">
-                <span>{story.avatar}</span>
-              </div>
-              {story.isYours && !story.hasStory && (
-                <div className="story-add">+</div>
-              )}
+        {/* Your story - always first */}
+        <div className="story-item" onClick={onCreateClick}>
+          <div className="story-ring yours">
+            <div className="story-avatar">
+              <span className="story-letter">{email?.[0]?.toUpperCase()}</span>
             </div>
-            <span className="story-name">{story.isYours ? 'Your story' : story.name}</span>
+            <div className="story-add">+</div>
+          </div>
+          <span className="story-name">Your story</span>
+        </div>
+
+        {/* Dynamic users who recently posted */}
+        {recentUsers.map((user, i) => (
+          <div key={user.email} className="story-item">
+            <div className={`story-ring has-story gradient-${(i % 4) + 1}`}>
+              <div className="story-avatar">
+                {user.hasAudio ? (
+                  <span className="story-emoji">🎵</span>
+                ) : (
+                  <span className="story-letter">{user.email[0].toUpperCase()}</span>
+                )}
+              </div>
+            </div>
+            <span className="story-name">{user.email.split('@')[0]}</span>
           </div>
         ))}
+
+        {/* Placeholder if no recent users */}
+        {recentUsers.length === 0 && (
+          <>
+            {['🎵', '🎧', '🎸', '🎷', '🎹'].map((emoji, i) => (
+              <div key={i} className="story-item">
+                <div className={`story-ring has-story gradient-${(i % 4) + 1}`}>
+                  <div className="story-avatar">
+                    <span className="story-emoji">{emoji}</span>
+                  </div>
+                </div>
+                <span className="story-name">music</span>
+              </div>
+            ))}
+          </>
+        )}
       </div>
     </div>
   )
