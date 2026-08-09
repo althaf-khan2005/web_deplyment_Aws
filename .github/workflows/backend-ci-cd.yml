@@ -47,7 +47,7 @@ jobs:
             cd /home/root/web_deplyment_Aws
             git pull origin main
             cd backend
-            npm ci --production
+            npm i
             npx prisma generate
             npx prisma migrate deploy
             pm2 restart backend || pm2 start server.js --name backend
