@@ -3,6 +3,8 @@ name: "CI/CD Workflow"
 on:
   push:
     branches: ["main"]
+    paths:
+      - "frontend/**"
 
 jobs:
   ci-test:
@@ -52,4 +54,4 @@ jobs:
         run: aws s3 sync . s3://${{ secrets.AWS_S3_BUCKET }} 
 
       - name: "Invalidate CloudFront cache"
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT }} --paths "/*"
