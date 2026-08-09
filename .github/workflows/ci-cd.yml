@@ -17,21 +17,12 @@ jobs:
         with:
           node-version: "20"
 
-      - name: "Install, Audit and Build"
-        run: | 
-            cd frontend
-            npm ci
-
-      - name: "Install the libary"
-        run : |
-           cd frontend 
-           npm run build
-
-      - name: "Checking the Audit"
-        run: | 
-            cd frontend
-            npm audit || true
-
+      - name: "Install and Build"
+        run: |
+          cd frontend
+          npm ci
+          npm audit || true
+          npm run build
 
       - name: "Upload build artifact"
         uses: actions/upload-artifact@v4
@@ -39,7 +30,7 @@ jobs:
           name: frontend-dist
           path: frontend/dist
 
-  Deploy-to-AWS_Cloud:
+  deploy-to-AWS_Cloud:
     runs-on: ubuntu-latest
     needs: ci-test
 
@@ -49,35 +40,16 @@ jobs:
         with:
           name: frontend-dist
           path: ./dist
-          
-      - name: "List downloaded files"
-        run: | 
-           ls 
-           pwd
 
       - name: "Configure AWS Credentials"
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCES_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECERET_KEY }}
-          aws-region: ap-south-1
+          aws-region: ap-southeast-1
 
       - name: "Deploy to S3"
-        run: aws s3 sync ./dist s3://${{ secrets.AWS_S3_BUCKET }} --delete
+        run: aws s3 sync . s3://${{ secrets.AWS_S3_BUCKET }} 
 
-  Cloudfront:
-
-       runs-on: ubuntu-latest
-       needs: Deploy-to-AWS_Cloud
-
-       steps:
-
-       - name: "Configure AWS Credentials"
-         uses: aws-actions/configure-aws-credentials@v4
-         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCES_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECERET_KEY }}
-          aws-region: ap-south-1
-
-       - name: "Invalidate CloudFront cache"
-         run: aws cloudfront create-invalidation --distribution-id ${{ secrets.cloudfront }} --paths "/*"
+      - name: "Invalidate CloudFront cache"
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
