@@ -1,10 +1,8 @@
 import './Dashboard.css'
 import Navbar from './Navbar'
-import Stories from './Stories'
-import InstaNotes from './InstaNotes'
 import MusicStory from './MusicStory'
 import PostCreate from './PostCreate'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -19,6 +17,8 @@ function Dashboard({ email, onLogout }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [viewingUser, setViewingUser] = useState(null)
+  const [playingPost, setPlayingPost] = useState(null)
+  const audioRef = useRef(null)
 
   const getAuthHeader = () => ({
     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -28,53 +28,57 @@ function Dashboard({ email, onLogout }) {
     try { const res = await axios.get(`${API_URL}/api/posts`, getAuthHeader()); setPosts(res.data) }
     catch (err) {} finally { setLoadingPosts(false) }
   }
-
   const fetchMyPosts = async () => {
     try { const res = await axios.get(`${API_URL}/api/posts/me`, getAuthHeader()); setMyPosts(res.data) }
     catch (err) {}
   }
-
   const fetchMyProfile = async () => {
     try { const res = await axios.get(`${API_URL}/api/users/me`, getAuthHeader()); setMyProfile(res.data) }
     catch (err) {}
   }
-
   const deletePost = async (id) => {
     try { await axios.delete(`${API_URL}/api/posts/${id}`, getAuthHeader()); setPosts(p => p.filter(x => x.id !== id)); setMyPosts(p => p.filter(x => x.id !== id)) }
     catch (err) {}
   }
-
   const toggleLike = (id) => {
     setLikedPosts(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
   }
-
   const searchUsers = async (q) => {
     setSearchQuery(q)
     if (q.length < 2) { setSearchResults([]); return }
     try { const res = await axios.get(`${API_URL}/api/users/search?q=${q}`, getAuthHeader()); setSearchResults(res.data) }
     catch (err) {}
   }
-
   const viewUserProfile = async (username) => {
     try { const res = await axios.get(`${API_URL}/api/users/${username}`, getAuthHeader()); setViewingUser(res.data); setActivePage('viewProfile') }
     catch (err) {}
   }
-
   const followUser = async (userId) => {
     try { await axios.post(`${API_URL}/api/follow/${userId}`, {}, getAuthHeader()); if (viewingUser) setViewingUser({ ...viewingUser, isFollowing: true }) }
     catch (err) {}
   }
-
   const unfollowUser = async (userId) => {
     try { await axios.delete(`${API_URL}/api/follow/${userId}`, getAuthHeader()); if (viewingUser) setViewingUser({ ...viewingUser, isFollowing: false }) }
     catch (err) {}
   }
-
   const togglePrivacy = async () => {
-    try {
-      const res = await axios.put(`${API_URL}/api/users/me`, { isPublic: !myProfile.isPublic }, getAuthHeader())
-      setMyProfile({ ...myProfile, ...res.data })
-    } catch (err) {}
+    try { const res = await axios.put(`${API_URL}/api/users/me`, { isPublic: !myProfile.isPublic }, getAuthHeader()); setMyProfile({ ...myProfile, ...res.data }) }
+    catch (err) {}
+  }
+
+  // Play/Pause song - only one at a time
+  const togglePlay = (postId, audioSrc) => {
+    if (playingPost === postId) {
+      audioRef.current?.pause()
+      setPlayingPost(null)
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = audioSrc
+        audioRef.current.play()
+      }
+      setPlayingPost(postId)
+    }
   }
 
   useEffect(() => { fetchPosts(); fetchMyPosts(); fetchMyProfile() }, [])
@@ -94,49 +98,92 @@ function Dashboard({ email, onLogout }) {
   return (
     <>
       <Navbar activePage={activePage} setActivePage={setActivePage} onLogout={onLogout} email={email} />
-      <main className="ig-main">
+      {/* Global audio player - only one song plays at a time */}
+      <audio ref={audioRef} onEnded={() => setPlayingPost(null)} />
 
+      <main className="ig-main">
         {/* HOME */}
         {activePage === 'home' && (
           <div className="ig-feed">
-            <div className="ig-stories-row">
-              <MusicStory email={email} />
-              <Stories email={email} onCreateClick={() => setActivePage('create')} />
+            {/* Stories - dynamic from posts */}
+            <div className="ig-stories-bar">
+              <div className="ig-stories-scroll">
+                <MusicStory email={email} />
+                {posts.filter(p => p.audio).slice(0, 8).map((post, i) => (
+                  <div key={post.id} className="ig-story-item" onClick={() => togglePlay(post.id, post.audio)}>
+                    <div className={`ig-story-ring ${playingPost === post.id ? 'playing' : ''}`} style={{ background: gradients[i % 6] }}>
+                      <div className="ig-story-avatar">
+                        {playingPost === post.id ? '🔊' : '🎵'}
+                      </div>
+                    </div>
+                    <span className="ig-story-name">{post.user.username || post.user.email.split('@')[0]}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <InstaNotes />
+
+            {/* Feed Posts */}
             <div className="ig-posts">
               {loadingPosts && <div className="ig-loading"><div className="ig-spinner"></div></div>}
               {!loadingPosts && posts.length === 0 && (
                 <div className="ig-empty-feed">
                   <h3>Welcome to MusicGram</h3>
-                  <p>Follow people or share your first post</p>
+                  <p>Share your first song or photo</p>
                   <button className="ig-cta-btn" onClick={() => setActivePage('create')}>Create Post</button>
                 </div>
               )}
+
               {posts.map((post, i) => (
                 <article key={post.id} className="ig-post" style={{ animationDelay: `${i * 0.08}s` }}>
+                  {/* Header */}
                   <div className="ig-post-header">
                     <div className="ig-post-avatar-ring" style={{ background: gradients[i % 6] }}>
-                      <div className="ig-post-avatar">{post.user.username?.[0]?.toUpperCase() || 'U'}</div>
+                      <div className="ig-post-avatar">{(post.user.username || post.user.email)[0].toUpperCase()}</div>
                     </div>
                     <div className="ig-post-user" onClick={() => viewUserProfile(post.user.username)} style={{cursor:'pointer'}}>
                       <span className="ig-post-username">{post.user.username || post.user.email.split('@')[0]}</span>
                     </div>
                     {post.user.email === email && <button className="ig-post-delete" onClick={() => deletePost(post.id)}>×</button>}
                   </div>
-                  {post.image && <div className="ig-post-media" onDoubleClick={() => toggleLike(post.id)}><img src={post.image} alt="" />{likedPosts.has(post.id) && <div className="ig-heart-animation">❤️</div>}</div>}
-                  {post.audio && (
-                    <div className="ig-post-audio-card" style={{ background: gradients[i % 6] }}>
-                      <div className="ig-audio-content">
-                        <div className="ig-audio-disc"><div className="ig-disc-inner">🎵</div></div>
-                        <div className="ig-audio-info">
-                          <span className="ig-audio-title">{post.audioName || post.caption || 'Now Playing'}</span>
-                          <span className="ig-audio-artist">{post.user.username || post.user.email.split('@')[0]}</span>
-                        </div>
-                      </div>
-                      <audio controls src={post.audio} className="ig-audio-player" />
+
+                  {/* Image */}
+                  {post.image && (
+                    <div className="ig-post-media" onDoubleClick={() => toggleLike(post.id)}>
+                      <img src={post.image} alt="" />
+                      {likedPosts.has(post.id) && <div className="ig-heart-animation">❤️</div>}
                     </div>
                   )}
+
+                  {/* Song - Gradient Card with Play/Pause */}
+                  {post.audio && (
+                    <div className={`ig-song-card ${playingPost === post.id ? 'is-playing' : ''}`} style={{ background: gradients[i % 6] }} onClick={() => togglePlay(post.id, post.audio)}>
+                      <div className="ig-song-content">
+                        <div className={`ig-song-disc ${playingPost === post.id ? 'spinning' : ''}`}>
+                          🎵
+                        </div>
+                        <div className="ig-song-info">
+                          <span className="ig-song-title">{post.audioName || post.caption || 'Untitled'}</span>
+                          <span className="ig-song-artist">{post.user.username || post.user.email.split('@')[0]}</span>
+                        </div>
+                        <div className="ig-song-play-btn">
+                          {playingPost === post.id ? (
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                          ) : (
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                          )}
+                        </div>
+                      </div>
+                      {playingPost === post.id && (
+                        <div className="ig-song-waves">
+                          {Array.from({length: 20}).map((_, j) => (
+                            <div key={j} className="ig-wave-bar" style={{ animationDelay: `${j * 0.05}s` }}></div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Actions */}
                   <div className="ig-post-actions">
                     <div className="ig-actions-left">
                       <button className={`ig-action-btn ${likedPosts.has(post.id) ? 'liked' : ''}`} onClick={() => toggleLike(post.id)}>
@@ -147,7 +194,8 @@ function Dashboard({ email, onLogout }) {
                     </div>
                     <button className="ig-action-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></button>
                   </div>
-                  {post.caption && !post.audio && <div className="ig-post-caption"><span className="ig-caption-user">{post.user.username || post.user.email.split('@')[0]}</span> {post.caption}</div>}
+
+                  {post.caption && <div className="ig-post-caption"><span className="ig-caption-user">{post.user.username || post.user.email.split('@')[0]}</span> {post.caption}</div>}
                   <div className="ig-post-time">{timeAgo(post.createdAt)}</div>
                 </article>
               ))}
@@ -155,14 +203,13 @@ function Dashboard({ email, onLogout }) {
           </div>
         )}
 
-        {/* SEARCH / EXPLORE */}
+        {/* SEARCH */}
         {activePage === 'search' && (
           <div className="ig-explore">
             <div className="ig-search-bar">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input type="text" placeholder="Search users..." value={searchQuery} onChange={(e) => searchUsers(e.target.value)} />
             </div>
-
             {searchResults.length > 0 && (
               <div className="ig-search-results">
                 {searchResults.map(user => (
@@ -170,19 +217,18 @@ function Dashboard({ email, onLogout }) {
                     <div className="ig-search-avatar">{user.username[0].toUpperCase()}</div>
                     <div className="ig-search-info">
                       <span className="ig-search-username">{user.username}</span>
-                      <span className="ig-search-bio">{user.bio || (user.isPublic ? 'Public profile' : '🔒 Private')}</span>
+                      <span className="ig-search-bio">{user.isPublic ? '🌐 Public' : '🔒 Private'} • {user._count.posts} posts</span>
                     </div>
-                    <span className="ig-search-posts">{user._count.posts} posts</span>
                   </div>
                 ))}
               </div>
             )}
-
             {searchQuery.length < 2 && (
               <div className="ig-explore-grid">
-                {posts.filter(p => p.image).map((post, i) => (
+                {posts.map((post, i) => (
                   <div key={post.id} className={`ig-explore-item ${i % 7 === 0 ? 'big' : ''}`}>
-                    <img src={post.image} alt="" />
+                    {post.image && <img src={post.image} alt="" />}
+                    {!post.image && <div className="ig-explore-audio" style={{ background: gradients[i % 6] }}><span>🎵</span></div>}
                   </div>
                 ))}
               </div>
@@ -190,122 +236,81 @@ function Dashboard({ email, onLogout }) {
           </div>
         )}
 
-        {/* VIEW OTHER USER'S PROFILE */}
+        {/* VIEW PROFILE */}
         {activePage === 'viewProfile' && viewingUser && (
           <div className="ig-profile">
             <div className="ig-profile-header">
-              <div className="ig-profile-avatar-wrapper">
-                <div className="ig-profile-avatar-ring"><div className="ig-profile-avatar">{viewingUser.username[0].toUpperCase()}</div></div>
-              </div>
+              <div className="ig-profile-avatar-ring"><div className="ig-profile-avatar-big">{viewingUser.username[0].toUpperCase()}</div></div>
               <div className="ig-profile-info">
                 <div className="ig-profile-top">
                   <h2>{viewingUser.username}</h2>
                   {!viewingUser.isOwnProfile && (
-                    viewingUser.isFollowing ? (
-                      <button className="ig-unfollow-btn" onClick={() => unfollowUser(viewingUser.id)}>Following</button>
-                    ) : (
-                      <button className="ig-follow-btn" onClick={() => followUser(viewingUser.id)}>Follow</button>
-                    )
+                    viewingUser.isFollowing
+                      ? <button className="ig-unfollow-btn" onClick={() => unfollowUser(viewingUser.id)}>Following</button>
+                      : <button className="ig-follow-btn" onClick={() => followUser(viewingUser.id)}>Follow</button>
                   )}
                 </div>
                 <div className="ig-profile-stats">
-                  <div className="ig-stat"><strong>{viewingUser._count.posts}</strong><span>posts</span></div>
-                  <div className="ig-stat"><strong>{viewingUser._count.followers}</strong><span>followers</span></div>
-                  <div className="ig-stat"><strong>{viewingUser._count.following}</strong><span>following</span></div>
+                  <div className="ig-stat"><strong>{viewingUser._count.posts}</strong> posts</div>
+                  <div className="ig-stat"><strong>{viewingUser._count.followers}</strong> followers</div>
+                  <div className="ig-stat"><strong>{viewingUser._count.following}</strong> following</div>
                 </div>
-                <div className="ig-profile-bio">
-                  <p className="ig-bio-name">{viewingUser.username}</p>
-                  {viewingUser.bio && <p className="ig-bio-text">{viewingUser.bio}</p>}
-                  {!viewingUser.isPublic && !viewingUser.isFollowing && !viewingUser.isOwnProfile && (
-                    <p className="ig-private-label">🔒 This account is private</p>
-                  )}
-                </div>
+                {viewingUser.bio && <p className="ig-bio-text">{viewingUser.bio}</p>}
+                {!viewingUser.isPublic && !viewingUser.isFollowing && !viewingUser.isOwnProfile && <p className="ig-private-label">🔒 This account is private</p>}
               </div>
             </div>
-
-            {/* Posts grid (only if public or following) */}
-            {viewingUser.posts && viewingUser.posts.length > 0 ? (
+            {viewingUser.posts?.length > 0 && (
               <div className="ig-profile-grid">
                 {viewingUser.posts.map((post, i) => (
                   <div key={post.id} className="ig-grid-item">
                     {post.image && <img src={post.image} alt="" />}
-                    {!post.image && post.audio && <div className="ig-grid-audio" style={{ background: gradients[i % 6] }}><span>🎵</span></div>}
-                    {!post.image && !post.audio && <div className="ig-grid-text" style={{ background: gradients[i % 6] }}><p>{post.caption}</p></div>}
+                    {!post.image && <div className="ig-grid-audio" style={{ background: gradients[i % 6] }}><span>🎵</span></div>}
                   </div>
                 ))}
               </div>
-            ) : (
-              !viewingUser.isPublic && !viewingUser.isFollowing && !viewingUser.isOwnProfile ? (
-                <div className="ig-empty-feed"><h3>This Account is Private</h3><p>Follow to see their posts</p></div>
-              ) : (
-                <div className="ig-empty-feed"><p>No posts yet</p></div>
-              )
             )}
-            <button className="ig-back-link" onClick={() => setActivePage('search')}>← Back to search</button>
+            {!viewingUser.isPublic && !viewingUser.isFollowing && !viewingUser.isOwnProfile && <div className="ig-empty-feed"><h3>This Account is Private</h3><p>Follow to see their posts</p></div>}
+            <button className="ig-back-link" onClick={() => setActivePage('search')}>← Back</button>
           </div>
         )}
 
         {/* CREATE */}
-        {activePage === 'create' && (
-          <div className="ig-create-page"><PostCreate onPostCreated={handlePostCreated} /></div>
-        )}
+        {activePage === 'create' && <div className="ig-create-page"><PostCreate onPostCreated={handlePostCreated} /></div>}
 
         {/* MY PROFILE */}
         {activePage === 'profile' && (
           <div className="ig-profile">
             <div className="ig-profile-header">
-              <div className="ig-profile-avatar-wrapper">
-                <div className="ig-profile-avatar-ring"><div className="ig-profile-avatar">{myProfile?.username?.[0]?.toUpperCase() || email[0].toUpperCase()}</div></div>
-              </div>
+              <div className="ig-profile-avatar-ring"><div className="ig-profile-avatar-big">{(myProfile?.username || email)[0].toUpperCase()}</div></div>
               <div className="ig-profile-info">
                 <div className="ig-profile-top">
                   <h2>{myProfile?.username || email.split('@')[0]}</h2>
-                  <button className="ig-edit-btn" onClick={togglePrivacy}>
-                    {myProfile?.isPublic ? '🌐 Public' : '🔒 Private'}
-                  </button>
+                  <button className="ig-edit-btn" onClick={togglePrivacy}>{myProfile?.isPublic ? '🌐 Public' : '🔒 Private'}</button>
                 </div>
                 <div className="ig-profile-stats">
-                  <div className="ig-stat"><strong>{myProfile?._count?.posts || myPosts.length}</strong><span>posts</span></div>
-                  <div className="ig-stat"><strong>{myProfile?._count?.followers || 0}</strong><span>followers</span></div>
-                  <div className="ig-stat"><strong>{myProfile?._count?.following || 0}</strong><span>following</span></div>
+                  <div className="ig-stat"><strong>{myPosts.length}</strong> posts</div>
+                  <div className="ig-stat"><strong>{myProfile?._count?.followers || 0}</strong> followers</div>
+                  <div className="ig-stat"><strong>{myProfile?._count?.following || 0}</strong> following</div>
                 </div>
-                <div className="ig-profile-bio">
-                  <p className="ig-bio-name">{myProfile?.username || email.split('@')[0]}</p>
-                  <p className="ig-bio-text">{myProfile?.bio || '🎵 Music is life'}</p>
-                  <p className="ig-privacy-badge">{myProfile?.isPublic ? '🌐 Everyone can see your posts' : '🔒 Only followers can see your posts'}</p>
-                </div>
+                <p className="ig-bio-text">{myProfile?.bio || '🎵 Music lover'}</p>
               </div>
             </div>
 
             <div className="ig-profile-tabs">
-              <button className="ig-tab active">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                POSTS
-              </button>
-              <button className="ig-tab">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-                MUSIC
-              </button>
+              <button className="ig-tab active">POSTS</button>
+              <button className="ig-tab">MUSIC</button>
             </div>
 
             <div className="ig-profile-grid">
               {myPosts.map((post, i) => (
                 <div key={post.id} className="ig-grid-item" onClick={() => deletePost(post.id)}>
                   {post.image && <img src={post.image} alt="" />}
-                  {!post.image && post.audio && <div className="ig-grid-audio" style={{ background: gradients[i % 6] }}><span>🎵</span></div>}
-                  {!post.image && !post.audio && <div className="ig-grid-text" style={{ background: gradients[i % 6] }}><p>{post.caption}</p></div>}
+                  {!post.image && <div className="ig-grid-audio" style={{ background: gradients[i % 6] }}><span>🎵</span></div>}
                   <div className="ig-grid-overlay"><span>🗑️</span></div>
                 </div>
               ))}
             </div>
-
-            {myPosts.length === 0 && (
-              <div className="ig-empty-feed">
-                <h3>Share Music</h3>
-                <p>When you share songs or photos, they appear here.</p>
-                <button className="ig-cta-btn" onClick={() => setActivePage('create')}>Create Post</button>
-              </div>
-            )}
+            {myPosts.length === 0 && <div className="ig-empty-feed"><h3>Share Music</h3><p>Your posts appear here</p><button className="ig-cta-btn" onClick={() => setActivePage('create')}>Create Post</button></div>}
           </div>
         )}
       </main>
