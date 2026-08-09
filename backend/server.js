@@ -13,7 +13,7 @@ dotenv.config();
 
 const app = express();
 
-// CORS - allow frontend to reach backend
+// CORS - allow frontend to reach backends
 app.use(cors({
   origin: [
     'https://d1odyai7xs2p0i.cloudfront.net',
