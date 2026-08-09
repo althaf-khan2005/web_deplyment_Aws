@@ -9,6 +9,8 @@ import healthRoutes from './routes/health.js';
 import traceRoutes, { requestRecorder } from './routes/traces.js';
 import notesRoutes from './routes/notes.js';
 import postsRoutes from './routes/posts.js';
+import usersRoutes from './routes/users.js';
+import followRoutes from './routes/follow.js';
 import { errorLogger, requestTimer, notFoundHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -37,6 +39,8 @@ app.use(requestTimer);
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/posts', postsRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/follow', followRoutes);
 app.use('/', healthRoutes);
 app.use('/', traceRoutes);
 

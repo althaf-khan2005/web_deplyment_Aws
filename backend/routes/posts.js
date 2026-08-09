@@ -7,13 +7,30 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-// GET /api/posts - Get all posts (feed)
+// GET /api/posts - Get feed (own posts + followed users + public users)
 router.get('/', async (req, res) => {
   try {
-    const posts = await prisma.post.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: { user: { select: { email: true } } }
+    // Get list of users I follow
+    const followingList = await prisma.follow.findMany({
+      where: { followerId: req.user.id },
+      select: { followingId: true }
     });
+    const followingIds = followingList.map(f => f.followingId);
+
+    // Get posts from: myself, people I follow, public profiles
+    const posts = await prisma.post.findMany({
+      where: {
+        OR: [
+          { userId: req.user.id },
+          { userId: { in: followingIds } },
+          { user: { isPublic: true } }
+        ]
+      },
+      orderBy: { createdAt: 'desc' },
+      include: { user: { select: { id: true, email: true, username: true, isPublic: true } } },
+      take: 50
+    });
+
     res.json(posts);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -26,7 +43,7 @@ router.get('/me', async (req, res) => {
     const posts = await prisma.post.findMany({
       where: { userId: req.user.id },
       orderBy: { createdAt: 'desc' },
-      include: { user: { select: { email: true } } }
+      include: { user: { select: { id: true, email: true, username: true } } }
     });
     res.json(posts);
   } catch (error) {
@@ -34,16 +51,54 @@ router.get('/me', async (req, res) => {
   }
 });
 
-// POST /api/posts - Create a new post with base64 image/audio
+// GET /api/posts/stories - Get recent posts from followed users (for stories)
+router.get('/stories', async (req, res) => {
+  try {
+    const followingList = await prisma.follow.findMany({
+      where: { followerId: req.user.id },
+      select: { followingId: true }
+    });
+    const followingIds = followingList.map(f => f.followingId);
+
+    // Get recent posts (last 24h) from followed users
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const recentPosts = await prisma.post.findMany({
+      where: {
+        userId: { in: followingIds },
+        createdAt: { gte: oneDayAgo }
+      },
+      orderBy: { createdAt: 'desc' },
+      include: { user: { select: { id: true, username: true } } },
+      take: 20
+    });
+
+    // Group by user
+    const storiesMap = new Map();
+    for (const post of recentPosts) {
+      if (!storiesMap.has(post.userId)) {
+        storiesMap.set(post.userId, {
+          user: post.user,
+          latestPost: post
+        });
+      }
+    }
+
+    res.json(Array.from(storiesMap.values()));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST /api/posts - Create a new post
 router.post('/', async (req, res) => {
   try {
-    const { caption, image, audio } = req.body;
+    const { caption, image, audio, audioName } = req.body;
 
     if (!caption && !image && !audio) {
       return res.status(400).json({ message: 'Post must have caption, image, or audio' });
     }
 
-    // Validate base64 size (limit ~5MB for images, ~10MB for audio)
     if (image && image.length > 7 * 1024 * 1024) {
       return res.status(400).json({ message: 'Image too large (max 5MB)' });
     }
@@ -56,9 +111,10 @@ router.post('/', async (req, res) => {
         caption: caption || null,
         image: image || null,
         audio: audio || null,
+        audioName: audioName || null,
         userId: req.user.id
       },
-      include: { user: { select: { email: true } } }
+      include: { user: { select: { id: true, email: true, username: true } } }
     });
 
     res.status(201).json(post);
