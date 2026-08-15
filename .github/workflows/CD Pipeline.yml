@@ -34,7 +34,7 @@ jobs:
              uses: actions/upload-artifact@v4
              with:
                 name: "Build File"
-                path: dist/
+                path: frontend/dist/
 
     Deploy-in-S3:
 
