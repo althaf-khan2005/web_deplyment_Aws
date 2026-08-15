@@ -5,7 +5,7 @@ import { authMiddleware } from '../middleware/auth.js';
 const prisma = new PrismaClient();
 const router = express.Router();
 
-// All routes require authentication
+// All routes require authentications
 router.use(authMiddleware);
 
 // GET /api/notes - Get user's active notes (not expired)
