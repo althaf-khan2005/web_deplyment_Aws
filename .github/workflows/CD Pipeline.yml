@@ -57,11 +57,11 @@ jobs:
               with:
                 aws-access-key-id: ${{secrets.AWS_ACCES_KEY}}
                 aws-secret-access-key: ${{ secrets.AWS_SECERET_KEY }}
-                aws-region: ${{secrets.Aws_REGION}}
+                aws-region: ${{secrets.AWS_REGION}}
 
 
             - name: "Upload to the s3"
-              run: aws s3 sync . s3://${{secrets.Aws_s3}}
+              run: aws s3 sync . s3://${{secrets.AWS_s3}}
 
     Deploy-to-Cloudfront:
 
@@ -75,7 +75,7 @@ jobs:
              with:
                 aws-access-key-id: ${{secrets.AWS_ACCES_KEY}}
                 aws-secret-access-key: ${{ secrets.AWS_SECERET_KEY }}
-                aws-region: ${{secrets.Aws_REGION}}
+                aws-region: ${{secrets.AWS_REGION}}
 
            - name: "Cloudfront Invalidtion"
-             run: aws cloudfront create-invalidation --distribution-id ${{secrets.Aws_CLOUDFRONT}} --paths "/*"
+             run: aws cloudfront create-invalidation --distribution-id ${{secrets.AWS_CLOUDFRONT}} --paths "/*"
