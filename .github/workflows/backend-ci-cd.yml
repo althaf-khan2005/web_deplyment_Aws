@@ -33,8 +33,7 @@ jobs:
             port: 22
             debug: true
             script: | 
-               sudo chown -R ec2-user:ec2-user /home/ec2-user/web_deplyment_Aws
-               git config --global --add safe.directory /home/ec2-user/web_deplyment_Aws
+             
                cd /home/ec2-user/web_deplyment_Aws/
                git pull
                npm i
