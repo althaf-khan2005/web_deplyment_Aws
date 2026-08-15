@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-// GET /api/posts - Get feed (own posts + followed users + public users)
+// GET /api/posts - Get feed (own posts + followed users + pubic users)
 router.get('/', async (req, res) => {
   try {
     // Get list of users I follow
