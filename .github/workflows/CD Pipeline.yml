@@ -39,7 +39,7 @@ jobs:
 
     Deploy-in-S3:
 
-        runs-on: ubuntu-lastest
+        runs-on: ubuntu-latest
         needs: Frontend
 
         steps:
@@ -65,7 +65,7 @@ jobs:
 
     Deploy-to-Cloudfront:
 
-       runs-on: ubuntu-lastest
+       runs-on: ubuntu-latest
        needs: Deploy-in-S3
 
        steps:
