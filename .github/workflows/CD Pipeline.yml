@@ -45,7 +45,7 @@ jobs:
         steps:
 
             - name: "Download the folder"
-              uses: action/download-artifact@v4
+              uses: actions/download-artifact@v4
               with:
                 name: "Build File"
 
@@ -53,7 +53,7 @@ jobs:
 
 
             - name: "Configuration to the Aws"
-              uses: aws-actions/configure-aws-credentails@v4
+              uses: aws-actions/configure-aws-credentials@v4
               with:
                 aws-access-key-id: ${{secrets.AWS_ACCES_KEY}}
                 aws-secret-access-key: ${{ secrets.AWS_SECERET_KEY }}
