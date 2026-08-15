@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-// POST /api/follow/:userId - Follow a userso 
+// POST /api/follow/:userId - Follow a useso 
 router.post('/:userId', async (req, res) => {
   try {
     const followingId = parseInt(req.params.userId);
