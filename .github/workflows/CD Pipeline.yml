@@ -63,7 +63,7 @@ jobs:
 
 
             - name: "Upload to the s3"
-              run: cd dist && aws s3 sync . s3://${{secrets.AWS_S3}}
+              run: aws s3 sync frontend/dist/ s3://${{secrets.AWS_S3}}
 
     Deploy-to-Cloudfront:
 
