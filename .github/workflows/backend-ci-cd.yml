@@ -33,14 +33,14 @@ jobs:
             port: 22
             debug: true
             script: | 
-               sudo su
-               cd /home/ec2-user
-               cd web_deplyment_Aws/
+               sudo chown -R ec2-user:ec2-user /home/ec2-user/web_deplyment_Aws
+               git config --global --add safe.directory /home/ec2-user/web_deplyment_Aws
+               cd /home/ec2-user/web_deplyment_Aws/
                git pull
                npm i
                npx prisma migrate deploy
                npx prisma generate
-               pm2 restart server
+               pm2 restart server || pm2 start server.js --name server
         
 
           
