@@ -13,19 +13,19 @@ jobs:
 
      steps:
        - name: "Checkout the code"
-         uses: action/checkout@v4
+         uses: actions/checkout@v4
        - run: pwd 
 
        
        - name: "Configuration to the Aws"
-         uses: aws-action/configure-aws-credentails@v4
+         uses: aws-actions/configure-aws-credentials@v4
          with:
                 aws-access-key-id: ${{secrets.AWS_ACCES_KEY}}
                 aws-secret-access-key: ${{ secrets.AWS_SECERTE_KEY }}
                 aws-region: ${{secrets.AWS_REGION}}
 
        - name: "SSh to the Ec2"
-         uses: appleboy/ssh-action@v4
+         uses: appleboy/ssh-action@v1
          with:
             host: ${{ secrets.SERVER_HOST }}
             username: ${{ secrets.SERVER_USER }}
