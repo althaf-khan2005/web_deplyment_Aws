@@ -3,7 +3,8 @@ name: "Frontend-Depolyment"
 on:
     push:
         branches: ["main"]
-        paths: - "frontend/**"
+        paths:
+           - "frontend/**"
 
 
 
@@ -12,30 +13,33 @@ jobs:
         runs-on: ubuntu-lastest
         
         steps:
-           uses: action/checkout@v4
-           run: pwd
 
+           - uses: actions/checkout@v4
+             
+
+            
            - name: "Install the Node"
-             uses: action/setup-node@v4
+             uses: actions/setup-node@v4
              with:
                 node-version: 18
              
 
-          - name: "Unit Test"
-            run: npm i
+           - name: "Unit Test"
+             run: npm i
 
-          - name: "Build"
-            run: cd frontend | npm run build
+           - name: "Build"
+             run: 
+              cd frontend | npm run build
 
-          - name: "Upload build file"
-            uses: action/upload-artifact@v4
-            with:
+           - name: "Upload build file"
+             uses: actions/upload-artifact@v4
+             with:
                 name: "Build File"
                 path: dist/
 
     Deploy-in-S3:
 
-        runs-on: ubuntu:-lastest
+        runs-on: ubuntu-lastest
         needs: Frontend
 
         steps:
@@ -44,11 +48,12 @@ jobs:
               uses: action/download-artifact@v4
               with:
                 name: "Build File"
-                run: pwd
+
+            - run: pwd
 
 
             - name: "Configuration to the Aws"
-              uses: aws-action/configure-aws-credentails@v4
+              uses: aws-actions/configure-aws-credentails@v4
               with:
                 aws-access-key-id: ${{secrets.AWS_ACCES_KEY}}
                 aws-secret-access-key: ${{ secrets.AWS_SECERET_KEY }}
@@ -56,7 +61,7 @@ jobs:
 
 
             - name: "Upload to the s3"
-              run: aws s3 sync . s3://${{secret.Aws_s3}}
+              run: aws s3 sync . s3://${{secrets.Aws_s3}}
 
     Deploy-to-Cloudfront:
 
@@ -66,23 +71,11 @@ jobs:
        steps:
 
            - name: "Configuration to the Aws"
-              uses: aws-action/configure-aws-credentails@v4
-              with:
+             uses: aws-action/configure-aws-credentails@v4
+             with:
                 aws-access-key-id: ${{secrets.AWS_ACCES_KEY}}
                 aws-secret-access-key: ${{ secrets.AWS_SECERET_KEY }}
                 aws-region: ${{secrets.Aws_REGION}}
 
-            - name: "Cloudfront Invalidtion"
-              run: aws cloudfront create-invalidation --distribution-id ${{secrets.Aws_CLOUDFRONT}} --paths "/*"
-
-
-           
-              
-              
-
-
-
-
-
-        
-        
+           - name: "Cloudfront Invalidtion"
+             run: aws cloudfront create-invalidation --distribution-id ${{secrets.Aws_CLOUDFRONT}} --paths "/*"
