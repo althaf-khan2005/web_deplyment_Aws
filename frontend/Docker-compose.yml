@@ -20,7 +20,7 @@ services:
        depends_on:
         - DB
        env_file:
-         ./backend/.env
+         ./backend/.envs
        ports:
          - 5000:5000
       
